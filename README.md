@@ -14,14 +14,30 @@ npm install --save use-request
 ## Usage
 
 ```jsx
-import React, { Component } from 'react'
+function MyComponent() {
+  const [todos, fetchTodos] = useRequest({
+    service: MyService.getTodos,
+    onSuccess: (response) => {
+      api.setHeaders('Authorization', response.headers.authorization)
+    },
+    onFailure: (error) => {},
+    onFetch: () => {},
+    dependencies: [foo, bar]
+  })
 
-import { useMyHook } from 'use-request'
+  if (todos.fetching) {
+    return <h1>Loading...</h1>
+  }
 
-const Example = () => {
-  const example = useMyHook()
+  if (todos.error) {
+    return <h1>Oops! Something was wrong</h1>
+  }
+
   return (
-    <div>{example}</div>
+    <div>
+      <TodoList todos={todos.data}>
+      <Button onClick={fetchTodos}>Refresh</Button>
+    </div>
   )
 }
 ```
