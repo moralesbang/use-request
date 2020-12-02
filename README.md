@@ -35,7 +35,7 @@ function MyComponent() {
 
   return (
     <div>
-      <TodoList todos={todos.data}>
+      <TodoList todos={todos.data} />
       <Button onClick={fetchTodos}>Refresh</Button>
     </div>
   )
