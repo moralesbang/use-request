@@ -15,7 +15,7 @@ npm install --save use-request
 
 ```jsx
 function MyComponent() {
-  const [todos, fetchTodos] = useRequest({
+  const [todos, fetchTodos, setTodos] = useRequest({
     service: MyService.getTodos,
     onSuccess: (response) => {
       api.setHeaders('Authorization', response.headers.authorization)
@@ -33,9 +33,14 @@ function MyComponent() {
     return <h1>Oops! Something was wrong</h1>
   }
 
+  const handleDeleteTodo = (todoId) => {
+    const { [todoId]: _removed, ...restTodos } = todos.data; 
+    setTodos({ data: restTodos })
+  }
+
   return (
     <div>
-      <TodoList todos={todos.data} />
+      <TodoList todos={todos.data} onDelete={handleDeleteTodo} />
       <Button onClick={fetchTodos}>Refresh</Button>
     </div>
   )
