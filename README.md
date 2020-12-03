@@ -20,7 +20,7 @@ function MyComponent() {
     onSuccess: (response) => {
       api.setHeaders('Authorization', response.headers.authorization)
     },
-    onFailure: (error) => {},
+    onFailure: (response) => {},
     onFetch: () => {},
     dependencies: [foo, bar]
   })

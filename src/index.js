@@ -14,8 +14,8 @@ export function useLazyRequest({
   onSuccess,
   onFailure,
   onFetch,
-  transformData = (data) => data,
-  transformError
+  dataSelector = (response) => response.data,
+  errorSelector = (response) => response.problem || response.data
 }) {
   const [state, setState] = useSetState({
     data: null,
@@ -27,17 +27,16 @@ export function useLazyRequest({
     try {
       const response = service(payload)
       const isSuccess = response.status === 200 // Update for handle all 2XX
-      const responseError = transformError(response)
 
       if (isSuccess) {
         setState({
-          data: response.data && transformData(response.data),
+          data: dataSelector(response.data),
           error: null
         })
         if (onSuccess) onSuccess(response)
       } else {
-        setState({ data: null, error: responseError }) // Update for handle every rest client
-        if (onFailure) onFailure(responseError)
+        setState({ data: null, error: errorSelector(response) })
+        if (onFailure) onFailure(response)
       }
     } catch (error) {
       console.error(`🚨 ${error}`)
