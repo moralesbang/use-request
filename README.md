@@ -16,13 +16,7 @@ npm install --save use-request
 ```jsx
 function MyComponent() {
   const [todos, fetchTodos, setTodos] = useRequest({
-    service: MyService.getTodos,
-    onSuccess: (response) => {
-      api.setHeaders('Authorization', response.headers.authorization)
-    },
-    onFailure: (response) => {},
-    onFetch: () => {},
-    dependencies: [foo, bar]
+    service: MyService.getTodos
   })
 
   if (todos.fetching) {
