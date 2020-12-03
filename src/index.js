@@ -23,9 +23,9 @@ export function useLazyRequest({
     error: null
   })
 
-  const fetchData = () => {
+  const fetchData = async () => {
     try {
-      const response = service(payload)
+      const response = await service(payload)
       const isSuccess = response.status === 200 // Update for handle all 2XX
 
       if (isSuccess) {
