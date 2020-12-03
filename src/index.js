@@ -59,4 +59,4 @@ export function useRequest({ dependencies = [], ...options }) {
   return lazyRequest
 }
 
-export const customizeHook = (hook, customOptions) => (options) => hook({ ...customOptions, options })
+export const customizeHook = (hook, customOptions) => (options) => hook({ ...customOptions, ...options })
