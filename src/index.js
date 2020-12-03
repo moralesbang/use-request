@@ -24,13 +24,15 @@ export function useLazyRequest({
   })
 
   const fetchData = async () => {
+    setState({ fetching: true })
+
     try {
       const response = await service(payload)
       const isSuccess = response.status === 200 // Update for handle all 2XX
 
       if (isSuccess) {
         setState({
-          data: dataSelector(response.data),
+          data: dataSelector(response),
           error: null
         })
         if (onSuccess) onSuccess(response)
@@ -54,7 +56,7 @@ export function useRequest({ dependencies = [], ...options }) {
 
   useEffect(() => {
     fetchData()
-  }, dependencies)
+  }, [fetchData, ...dependencies])
 
   return [state, fetchData, setState]
 }
