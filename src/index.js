@@ -52,14 +52,13 @@ export function useLazyRequest({
 }
 
 export function useRequest({ dependencies = [], ...options }) {
-  const lazyRequest = useLazyRequest(options)
-  const [fetchData] = lazyRequest
+  const [state, fetchData, setState] = useLazyRequest(options)
 
   useEffect(() => {
     fetchData()
   }, [fetchData, ...dependencies])
 
-  return lazyRequest
+  return [state, fetchData, setState]
 }
 
 export const customizeHook = (hook, customOptions) => (options) => hook({ ...customOptions, ...options })
