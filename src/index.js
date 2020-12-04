@@ -1,7 +1,7 @@
 import { useReducer, useEffect } from 'react'
 
-function validOptions (hookName, options) {
-  if (options?.service?.constructor.name !== 'Function') {
+function validService (hookName, service) {
+  if (service?.constructor.name !== 'Function') {
     throw Error(`🚨 You must to provide a valid service for ${hookName}`)
   }
 }
@@ -14,18 +14,16 @@ function useSetState(initialState = {}) {
   return reducer
 }
 
-export function useLazyRequest(options) {
-  validOptions('useLazyRequest', options)
-
-  const {
-    service,
-    payload,
-    onSuccess,
-    onFailure,
-    onFetch,
-    dataSelector = (response) => response.data,
-    errorSelector = (response) => response.problem || response.data
-  } = options
+export function useLazyRequest({
+  service,
+  payload,
+  onSuccess,
+  onFailure,
+  onFetch,
+  dataSelector = (response) => response.data,
+  errorSelector = (response) => response.problem || response.data
+} = {}) {
+  validService('useLazyRequest', service)
 
   const [state, setState] = useSetState({
     data: null,
@@ -61,8 +59,8 @@ export function useLazyRequest(options) {
   return [state, fetchData, setState]
 }
 
-export function useRequest(options, dependencies = []) {
-  validOptions('useRequest', options)
+export function useRequest(options = {}, dependencies = []) {
+  validService('useRequest', options.service)
   const [state, fetchData, setState] = useLazyRequest(options)
 
   useEffect(() => {
