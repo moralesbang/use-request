@@ -1,5 +1,11 @@
 import { useReducer, useEffect } from 'react'
 
+function validOptions (hookName, options) {
+  if (options?.service?.constructor.name !== 'Function') {
+    throw Error(`🚨 You must to provide a valid service for ${hookName}`)
+  }
+}
+
 function useSetState(initialState = {}) {
   const reducer = useReducer((state, newState) => {
     return { ...state, ...newState }
@@ -8,15 +14,19 @@ function useSetState(initialState = {}) {
   return reducer
 }
 
-export function useLazyRequest({
-  service,
-  payload,
-  onSuccess,
-  onFailure,
-  onFetch,
-  dataSelector = (response) => response.data,
-  errorSelector = (response) => response.problem || response.data
-}) {
+export function useLazyRequest(options) {
+  validOptions('useLazyRequest', options)
+
+  const {
+    service,
+    payload,
+    onSuccess,
+    onFailure,
+    onFetch,
+    dataSelector = (response) => response.data,
+    errorSelector = (response) => response.problem || response.data
+  } = options
+
   const [state, setState] = useSetState({
     data: null,
     fetching: false,
@@ -51,12 +61,15 @@ export function useLazyRequest({
   return [state, fetchData, setState]
 }
 
-export function useRequest({ dependencies = [], ...options }) {
-  const [state, fetchData, setState] = useLazyRequest(options)
+export function useRequest(options) {
+  validOptions('useRequest', options)
+
+  const { dependencies = [], ...restOptions } = options
+  const [state, fetchData, setState] = useLazyRequest(restOptions)
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, ...dependencies])
+  }, [])
 
   return [state, fetchData, setState]
 }

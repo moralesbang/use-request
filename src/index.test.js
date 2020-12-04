@@ -1,29 +1,85 @@
-import { useMyHook } from './'
-import { renderHook, act } from "@testing-library/react-hooks";
+import { useLazyRequest, useRequest } from './'
+import { act, renderHook } from '@testing-library/react-hooks'
 
-// mock timer using jest
-jest.useFakeTimers();
+const mockServiceSuccessful = () => Promise.resolve({ status: 200, data: [{ foo: 'bar' }] })
+const mockServiceFailure = () => Promise.resolve({ status: 404, problem: { message: 'Not Found' } })
 
-describe('useMyHook', () => {
-  it('updates every second', () => {
-    const { result } = renderHook(() => useMyHook());
+describe('useLazyRequest', () => {
+  test('instance with no options', () => {
+    const {result} = renderHook(() => useLazyRequest())
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useLazyRequest'))
+  })
 
-    expect(result.current).toBe(0);
+  test('instance with no service', () => {
+    const {result} = renderHook(() => useLazyRequest({}))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useLazyRequest'))
+  })
 
-    // Fast-forward 1sec
+  test('request service is successful', async () => {
+    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({ service: mockServiceSuccessful }))
+    const [, fetchData] = result.current
+
     act(() => {
-      jest.advanceTimersByTime(1000);
-    });
+      fetchData()
+    })
 
-    // Check after total 1 sec
-    expect(result.current).toBe(1);
+    const [fetchingState] = result.current
+    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
 
-    // Fast-forward 1 more sec
+    await waitForNextUpdate()
+
+    const [successfulState] = result.current
+    expect(successfulState).toMatchObject({ data: [{ foo: 'bar' }], fetching: false, error: null })
+  })
+
+  test('request service is failure', async () => {
+    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({ service: mockServiceFailure }))
+    const [, fetchData] = result.current
+
     act(() => {
-      jest.advanceTimersByTime(1000);
-    });
+      fetchData()
+    })
 
-    // Check after total 2 sec
-    expect(result.current).toBe(2);
+    await waitForNextUpdate()
+
+    const [state] = result.current
+
+    expect(state).toMatchObject({ data: null, fetching: false, error: { message: 'Not Found' } })
+  })
+})
+
+describe('useRequest', () => {
+  test('no options', () => {
+    const {result} = renderHook(() => useRequest())
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useRequest'))
+  })
+
+  test('instance with no service', () => {
+    const {result} = renderHook(() => useRequest({}))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useRequest'))
+  })
+
+  test('request service is successful', async () => {
+    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: mockServiceSuccessful }))
+
+    const [fetchingState] = result.current
+    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
+
+    await waitForNextUpdate()
+
+    const [successfulState] = result.current
+    expect(successfulState).toMatchObject({ data: [{ foo: 'bar' }], fetching: false, error: null })
+  })
+
+  test('request service is failure', async () => {
+    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: mockServiceFailure }))
+
+    const [fetchingState] = result.current
+    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
+
+    await waitForNextUpdate()
+
+    const [successfulState] = result.current
+    expect(successfulState).toMatchObject({ data: null, fetching: false, error: { message: 'Not Found' } })
   })
 })
