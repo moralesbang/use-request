@@ -61,15 +61,13 @@ export function useLazyRequest(options) {
   return [state, fetchData, setState]
 }
 
-export function useRequest(options) {
+export function useRequest(options, dependencies = []) {
   validOptions('useRequest', options)
-
-  const { dependencies = [], ...restOptions } = options
-  const [state, fetchData, setState] = useLazyRequest(restOptions)
+  const [state, fetchData, setState] = useLazyRequest(options)
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, dependencies)
 
   return [state, fetchData, setState]
 }
