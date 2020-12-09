@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect } from 'react'
 
 function validService (hookName, service) {
   if (service?.constructor.name !== 'Function') {
@@ -21,56 +21,55 @@ function useLazyRequest({
   onFailure,
   onFetch,
   dataSelector = (response) => response.data,
-  errorSelector = (response) => response.problem || response.data,
+  errorSelector = (response) => response.problem || response.data
 } = {}) {
-  validService("useLazyRequest", service);
+  validService('useLazyRequest', service)
 
   const [state, setState] = useSetState({
     data: null,
     fetching: false,
-    error: null,
-  });
+    error: null
+  })
 
   const fetchData = async (directPayload) => {
-    setState({ fetching: true });
-    
+    setState({ fetching: true })
+
     try {
-      const response = await service(directPayload || payload);
-      const isSuccess = response.status === 200; // Update for handle all 2XX
+      const response = await service(directPayload || payload)
+      const isSuccess = response.status === 200 // Update for handle all 2XX
 
       if (isSuccess) {
         setState({
           data: dataSelector(response),
-          error: null,
-        });
-        if (onSuccess) onSuccess(response);
+          error: null
+        })
+        if (onSuccess) onSuccess(response)
       } else {
-        setState({ data: null, error: errorSelector(response) });
-        if (onFailure) onFailure(response);
+        setState({ data: null, error: errorSelector(response) })
+        if (onFailure) onFailure(response)
       }
     } catch (error) {
-      console.error(`🚨 ${error}`);
+      console.error(`🚨 ${error}`)
     } finally {
-      setState({ fetching: false });
-      if (onFetch) onFetch();
+      setState({ fetching: false })
+      if (onFetch) onFetch()
     }
-  };
+  }
 
-  return [state, fetchData, setState];
+  return [state, fetchData, setState]
 }
 
 function useRequest(options = {}, dependencies = []) {
-  validService("useRequest", options.service);
-  const [state, fetchData, setState] = useLazyRequest(options);
+  validService('useRequest', options.service)
+  const [state, fetchData, setState] = useLazyRequest(options)
 
   useEffect(() => {
-    fetchData();
-  }, dependencies);
+    fetchData()
+  }, dependencies)
 
-  return [state, fetchData, setState];
+  return [state, fetchData, setState]
 }
 
-const customizeHook = (hook, customOptions) => (options) =>
-  hook({ ...customOptions, ...options });
+const customizeHook = (hook, customOptions) => (options) => hook({ ...customOptions, ...options })
 
-export { useLazyRequest, useRequest, customizeHook };
+export { useLazyRequest, useRequest, customizeHook }

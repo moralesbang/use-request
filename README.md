@@ -28,8 +28,8 @@ function MyComponent() {
   }
 
   const handleDeleteTodo = (todoId) => {
-    const { [todoId]: _removed, ...restTodos } = todos.data; 
-    setTodos({ data: restTodos })
+    const newTodos = todos.data.filter((todo) => todo.id !== todoId)
+    setTodos({ data: newTodos })
   }
 
   return (
