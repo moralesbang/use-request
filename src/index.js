@@ -48,11 +48,12 @@ function useLazyRequest({
         setState({ data: null, error: errorSelector(response) })
         if (onFailure) onFailure(response)
       }
+
+      if (onFetch) onFetch()
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
       setState({ fetching: false })
-      if (onFetch) onFetch()
     }
   }
 
