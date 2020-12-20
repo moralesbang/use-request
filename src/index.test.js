@@ -1,8 +1,13 @@
 import { useLazyRequest, useRequest } from './'
 import { act, renderHook } from '@testing-library/react-hooks'
+import { create, CLIENT_ERROR } from 'apisauce'
 
-const mockServiceSuccessful = () => Promise.resolve({ status: 200, data: [{ foo: 'bar' }] })
-const mockServiceFailure = () => Promise.resolve({ status: 404, problem: { message: 'Not Found' } })
+const api = create({
+  baseURL: 'https://moralesbang.dev'
+})
+
+const successfulService = () => api.get('/successful')
+const failureService = () => api.post('/failure')
 
 describe('useLazyRequest', () => {
   test('instance with no options', () => {
@@ -16,7 +21,10 @@ describe('useLazyRequest', () => {
   })
 
   test('request service is successful', async () => {
-    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({ service: mockServiceSuccessful }))
+    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({
+      service: successfulService
+    }))
+
     const [, fetchData] = result.current
 
     act(() => {
@@ -29,11 +37,11 @@ describe('useLazyRequest', () => {
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: [{ foo: 'bar' }], fetching: false, error: null })
+    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, fetching: false, error: null })
   })
 
   test('request service is failure', async () => {
-    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({ service: mockServiceFailure }))
+    const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({ service: failureService }))
     const [, fetchData] = result.current
 
     act(() => {
@@ -44,7 +52,7 @@ describe('useLazyRequest', () => {
 
     const [state] = result.current
 
-    expect(state).toMatchObject({ data: null, fetching: false, error: { message: 'Not Found' } })
+    expect(state).toMatchObject({ data: null, fetching: false, error: CLIENT_ERROR })
   })
 })
 
@@ -60,7 +68,7 @@ describe('useRequest', () => {
   })
 
   test('request service is successful', async () => {
-    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: mockServiceSuccessful }))
+    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: successfulService }))
 
     const [fetchingState] = result.current
     expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
@@ -68,11 +76,11 @@ describe('useRequest', () => {
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: [{ foo: 'bar' }], fetching: false, error: null })
+    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, fetching: false, error: null })
   })
 
   test('request service is failure', async () => {
-    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: mockServiceFailure }))
+    const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: failureService }))
 
     const [fetchingState] = result.current
     expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
@@ -80,6 +88,6 @@ describe('useRequest', () => {
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: null, fetching: false, error: { message: 'Not Found' } })
+    expect(successfulState).toMatchObject({ data: null, fetching: false, error: CLIENT_ERROR })
   })
 })
