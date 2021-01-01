@@ -20,7 +20,7 @@ describe('useLazyRequest', () => {
     expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useLazyRequest'))
   })
 
-  test('request service is successful', async () => {
+  test('request service is successful with status', async () => {
     const {result, waitForNextUpdate} = renderHook(() => useLazyRequest({
       service: successfulService
     }))

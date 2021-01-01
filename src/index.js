@@ -1,5 +1,7 @@
 import { useReducer, useEffect } from 'react'
 
+const SUCCESS_STATUS_REGEX = /^20[0-4]/
+
 function validService (hookName, service) {
   if (service?.constructor.name !== 'Function') {
     throw Error(`🚨 You must to provide a valid service for ${hookName}`)
@@ -36,7 +38,7 @@ function useLazyRequest({
 
     try {
       const response = await service(directPayload || payload)
-      const isSuccess = response.status === 200 // Update for handle all 2XX
+      const isSuccess = SUCCESS_STATUS_REGEX.test(String(response.status))
 
       if (isSuccess) {
         setState({
