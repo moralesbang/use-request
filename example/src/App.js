@@ -14,9 +14,13 @@ const handleSubmit = callback => event => {
   callback()
 }
 
-function App () {
+function Repos() {
   const [username, setUsername] = useState('')
   const [repos, getRepos] = useRequest({ service: fetchUserRepos, payload: 'moralesbang' })
+
+  if (repos.fetching) {
+    return <div role='alert'>Loading...</div>
+  }
 
   return (
     <div>
@@ -32,6 +36,16 @@ function App () {
           </ul></>
       ) : <span role='img' aria-label='smiley emoji'>😄</span> }
     </div>
+  )
+}
+
+function App () {
+  const [showComponent, setShowComponent] = useState(true)
+  return (
+    <>
+      {showComponent && <Repos />}
+      <button type='button' onClick={() => setShowComponent(!showComponent)}>Toogle Component</button>
+    </>
   )
 }
 

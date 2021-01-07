@@ -16,6 +16,20 @@ function useSetState(initialState = {}) {
   return reducer
 }
 
+function useSafeSetState(initialState) {
+  const [state, setState] = useSetState(initialState)
+  const mountedRef = useRef(false)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => (mountedRef.current = false)
+  })
+
+  const setSafeState = (...args) => mountedRef.current && setState(...args)
+
+  return [state, setSafeState]
+}
+
 function useLazyRequest({
   service,
   payload,
@@ -27,17 +41,10 @@ function useLazyRequest({
 } = {}) {
   validService('useLazyRequest', service)
 
-  const [state, setState] = useSetState({
+  const [state, setState] = useSafeSetState({
     data: null,
     fetching: false,
     error: null
-  })
-
-  const mountedRef = useRef(false)
-
-  useEffect(() => {
-    mountedRef.current = true
-    return () => (mountedRef.current = false)
   })
 
   const fetchData = async (directPayload) => {
@@ -47,23 +54,23 @@ function useLazyRequest({
       const response = await service(directPayload || payload)
       const isSuccess = SUCCESS_STATUS_REGEX.test(String(response.status))
 
-      if (mountedRef.current) {
-        if (isSuccess) {
-          setState({
-            data: dataSelector(response),
-            error: null
-          })
-          if (onSuccess) onSuccess(response)
-        } else {
-          setState({ data: null, error: errorSelector(response) })
-          if (onFailure) onFailure(response)
-        }
+      if (isSuccess) {
+        setState({
+          data: dataSelector(response),
+          error: null,
+        });
 
-        if (onFetch) onFetch()
+        if (onSuccess) onSuccess(response)
+      } else {
+        setState({ data: null, error: errorSelector(response) })
+        if (onFailure) onFailure(response)
       }
+
+      if (onFetch) onFetch()
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
+      console.log("qwerty");
       setState({ fetching: false })
     }
   }
