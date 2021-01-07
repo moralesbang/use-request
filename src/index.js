@@ -57,8 +57,8 @@ function useLazyRequest({
       if (isSuccess) {
         setState({
           data: dataSelector(response),
-          error: null,
-        });
+          error: null
+        })
 
         if (onSuccess) onSuccess(response)
       } else {
@@ -70,7 +70,7 @@ function useLazyRequest({
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
-      console.log("qwerty");
+      console.log('qwerty')
       setState({ fetching: false })
     }
   }
