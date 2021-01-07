@@ -1,34 +1,8 @@
-import { useReducer, useEffect, useRef } from 'react'
+import { useEffect } from 'react'
+import { useSafeSetState } from './utils/hooks'
+import { validService } from './utils'
 
 const SUCCESS_STATUS_REGEX = /^20[0-4]/
-
-function validService (hookName, service) {
-  if (service?.constructor.name !== 'Function') {
-    throw Error(`🚨 You must to provide a valid service for ${hookName}`)
-  }
-}
-
-function useSetState(initialState = {}) {
-  const reducer = useReducer((state, newState) => {
-    return { ...state, ...newState }
-  }, initialState)
-
-  return reducer
-}
-
-function useSafeSetState(initialState) {
-  const [state, setState] = useSetState(initialState)
-  const mountedRef = useRef(false)
-
-  useEffect(() => {
-    mountedRef.current = true
-    return () => (mountedRef.current = false)
-  })
-
-  const setSafeState = (...args) => mountedRef.current && setState(...args)
-
-  return [state, setSafeState]
-}
 
 function useLazyRequest({
   service,
@@ -70,7 +44,6 @@ function useLazyRequest({
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
-      console.log('qwerty')
       setState({ fetching: false })
     }
   }
