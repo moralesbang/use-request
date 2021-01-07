@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react'
+import { useReducer, useEffect, useRef } from 'react'
 
 const SUCCESS_STATUS_REGEX = /^20[0-4]/
 
@@ -33,6 +33,13 @@ function useLazyRequest({
     error: null
   })
 
+  const mountedRef = useRef(false)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => (mountedRef.current = false)
+  })
+
   const fetchData = async (directPayload) => {
     setState({ fetching: true })
 
@@ -40,18 +47,20 @@ function useLazyRequest({
       const response = await service(directPayload || payload)
       const isSuccess = SUCCESS_STATUS_REGEX.test(String(response.status))
 
-      if (isSuccess) {
-        setState({
-          data: dataSelector(response),
-          error: null
-        })
-        if (onSuccess) onSuccess(response)
-      } else {
-        setState({ data: null, error: errorSelector(response) })
-        if (onFailure) onFailure(response)
-      }
+      if (mountedRef.current) {
+        if (isSuccess) {
+          setState({
+            data: dataSelector(response),
+            error: null
+          })
+          if (onSuccess) onSuccess(response)
+        } else {
+          setState({ data: null, error: errorSelector(response) })
+          if (onFailure) onFailure(response)
+        }
 
-      if (onFetch) onFetch()
+        if (onFetch) onFetch()
+      }
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
