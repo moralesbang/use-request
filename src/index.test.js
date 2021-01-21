@@ -87,7 +87,7 @@ describe('useRequest', () => {
 
     await waitForNextUpdate()
 
-    const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: null, status: 'success', error: CLIENT_ERROR })
+    const [failureState] = result.current
+    expect(failureState).toMatchObject({ data: null, status: 'error', error: CLIENT_ERROR })
   })
 })

@@ -25,7 +25,7 @@ function useLazyRequest({
   const [state, setState] = useSafeSetState({
     data: null,
     error: null,
-    status: false,
+    status: REQUEST_STATUS.idle
   })
 
   const fetchData = async (directPayload) => {
@@ -51,8 +51,6 @@ function useLazyRequest({
       if (onFetch) onFetch()
     } catch (error) {
       console.error(`🚨 ${error}`)
-    } finally {
-      setState({ status: REQUEST_STATUS.idle })
     }
   }
 
