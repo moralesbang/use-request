@@ -32,12 +32,12 @@ describe('useLazyRequest', () => {
     })
 
     const [fetchingState] = result.current
-    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
+    expect(fetchingState).toMatchObject({ data: null, status: 'fetching', error: null })
 
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, fetching: false, error: null })
+    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, status: 'success', error: null })
   })
 
   test('request service is failure', async () => {
@@ -52,7 +52,7 @@ describe('useLazyRequest', () => {
 
     const [state] = result.current
 
-    expect(state).toMatchObject({ data: null, fetching: false, error: CLIENT_ERROR })
+    expect(state).toMatchObject({ data: null, status: 'error', error: CLIENT_ERROR })
   })
 })
 
@@ -71,23 +71,23 @@ describe('useRequest', () => {
     const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: successfulService }))
 
     const [fetchingState] = result.current
-    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
+    expect(fetchingState).toMatchObject({ data: null, status: 'fetching', error: null })
 
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, fetching: false, error: null })
+    expect(successfulState).toMatchObject({ data: { message: 'Hello World' }, status: 'success', error: null })
   })
 
   test('request service is failure', async () => {
     const {result, waitForNextUpdate} = renderHook(() => useRequest({ service: failureService }))
 
     const [fetchingState] = result.current
-    expect(fetchingState).toMatchObject({ data: null, fetching: true, error: null })
+    expect(fetchingState).toMatchObject({ data: null, status: 'fetching', error: null })
 
     await waitForNextUpdate()
 
     const [successfulState] = result.current
-    expect(successfulState).toMatchObject({ data: null, fetching: false, error: CLIENT_ERROR })
+    expect(successfulState).toMatchObject({ data: null, status: 'success', error: CLIENT_ERROR })
   })
 })

@@ -4,6 +4,13 @@ import { validService } from './utils'
 
 const SUCCESS_STATUS_REGEX = /^20[0-4]/
 
+const REQUEST_STATUS = {
+  idle: 'idle',
+  fetching: 'fetching',
+  success: 'success',
+  error: 'error'
+}
+
 function useLazyRequest({
   service,
   payload,
@@ -17,12 +24,12 @@ function useLazyRequest({
 
   const [state, setState] = useSafeSetState({
     data: null,
-    fetching: false,
-    error: null
+    error: null,
+    status: false,
   })
 
   const fetchData = async (directPayload) => {
-    setState({ fetching: true })
+    setState({ status: REQUEST_STATUS.fetching })
 
     try {
       const response = await service(directPayload || payload)
@@ -31,12 +38,13 @@ function useLazyRequest({
       if (isSuccess) {
         setState({
           data: dataSelector(response),
-          error: null
+          error: null,
+          status: REQUEST_STATUS.success
         })
 
         if (onSuccess) onSuccess(response)
       } else {
-        setState({ data: null, error: errorSelector(response) })
+        setState({ data: null, error: errorSelector(response), status: REQUEST_STATUS.error })
         if (onFailure) onFailure(response)
       }
 
@@ -44,11 +52,18 @@ function useLazyRequest({
     } catch (error) {
       console.error(`🚨 ${error}`)
     } finally {
-      setState({ fetching: false })
+      setState({ status: REQUEST_STATUS.idle })
     }
   }
 
-  return [state, fetchData, setState]
+  const requestState = {
+    isFetching: state.status === REQUEST_STATUS.fetching,
+    isSuccess: state.status === REQUEST_STATUS.success,
+    isError: state.status === REQUEST_STATUS.error,
+    ...state
+  }
+
+  return [requestState, fetchData, setState]
 }
 
 function useRequest(options = {}, dependencies = []) {
