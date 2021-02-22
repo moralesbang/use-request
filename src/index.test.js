@@ -12,12 +12,12 @@ const failureService = () => api.post('/failure')
 describe('useLazyRequest', () => {
   test('instance with no options', () => {
     const {result} = renderHook(() => useLazyRequest())
-    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useLazyRequest'))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service'))
   })
 
   test('instance with no service', () => {
     const {result} = renderHook(() => useLazyRequest({}))
-    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useLazyRequest'))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service'))
   })
 
   test('request service is successful with status', async () => {
@@ -59,12 +59,12 @@ describe('useLazyRequest', () => {
 describe('useRequest', () => {
   test('no options', () => {
     const {result} = renderHook(() => useRequest())
-    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useRequest'))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service'))
   })
 
   test('instance with no service', () => {
     const {result} = renderHook(() => useRequest({}))
-    expect(result.error).toEqual(Error('🚨 You must to provide a valid service for useRequest'))
+    expect(result.error).toEqual(Error('🚨 You must to provide a valid service'))
   })
 
   test('request service is successful', async () => {

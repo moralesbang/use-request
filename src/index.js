@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useSafeSetState } from './utils/hooks'
-import { validService } from './utils'
+import { isRequiredService } from './utils'
 
 const SUCCESS_STATUS_REGEX = /^20[0-4]/
 
@@ -12,7 +12,7 @@ const REQUEST_STATUS = {
 }
 
 function useLazyRequest({
-  service,
+  service = isRequiredService(),
   payload,
   onSuccess,
   onFailure,
@@ -20,7 +20,6 @@ function useLazyRequest({
   dataSelector = (response) => response.data,
   errorSelector = (response) => response.problem || response.data
 } = {}) {
-  validService('useLazyRequest', service)
 
   const [state, setState] = useSafeSetState({
     data: null,
@@ -65,7 +64,6 @@ function useLazyRequest({
 }
 
 function useRequest(options = {}, dependencies = []) {
-  validService('useRequest', options.service)
   const [state, fetchData, setState] = useLazyRequest(options)
 
   useEffect(() => {
