@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useSafeSetState } from './utils/hooks'
 import { isRequiredService } from './utils'
 
@@ -20,38 +20,38 @@ function useLazyRequest({
   dataSelector = (response) => response.data,
   errorSelector = (response) => response.problem || response.data
 } = {}) {
-
   const [state, setState] = useSafeSetState({
     data: null,
     error: null,
     status: REQUEST_STATUS.idle
   })
 
-  const fetchData = async (directPayload) => {
-    setState({ status: REQUEST_STATUS.fetching })
-
-    try {
-      const response = await service(directPayload || payload)
-      const isSuccess = SUCCESS_STATUS_REGEX.test(String(response.status))
-
-      if (isSuccess) {
-        setState({
-          data: dataSelector(response),
-          error: null,
-          status: REQUEST_STATUS.success
-        })
-
-        if (onSuccess) onSuccess(response)
-      } else {
-        setState({ data: null, error: errorSelector(response), status: REQUEST_STATUS.error })
-        if (onFailure) onFailure(response)
+  const fetchData = useCallback(
+    async (directPayload) => {
+      setState({ status: REQUEST_STATUS.fetching })
+      try {
+        const response = await service(directPayload || payload)
+        const isSuccess = SUCCESS_STATUS_REGEX.test(String(response.status))
+  
+        if (isSuccess) {
+          setState({
+            data: dataSelector(response),
+            error: null,
+            status: REQUEST_STATUS.success
+          })
+  
+          if (onSuccess) onSuccess(response)
+        } else {
+          setState({ data: null, error: errorSelector(response), status: REQUEST_STATUS.error })
+          if (onFailure) onFailure(response)
+        }
+  
+        if (onFetch) onFetch()
+      } catch (error) {
+        console.error(`🚨 ${error}`)
       }
-
-      if (onFetch) onFetch()
-    } catch (error) {
-      console.error(`🚨 ${error}`)
     }
-  }
+  )
 
   const requestState = {
     isFetching: state.status === REQUEST_STATUS.fetching,
@@ -63,12 +63,13 @@ function useLazyRequest({
   return [requestState, fetchData, setState]
 }
 
-function useRequest(options = {}, dependencies = []) {
+function useRequest(options = {}, deps = []) {
   const [state, fetchData, setState] = useLazyRequest(options)
+  const nextDeps = deps.concat(fetchData);
 
   useEffect(() => {
     fetchData()
-  }, dependencies)
+  }, nextDeps)
 
   return [state, fetchData, setState]
 }
